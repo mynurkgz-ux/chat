@@ -1,11 +1,11 @@
-const a = document.querySelector('.a')
+// const a = document.querySelector('.a')
 
-const data = [
-    ]
-data.forEach((item) => {
-const divi = document.createElement('div')
-divi.innerHTML = `
+// const data = [
+//     ]
+// data.forEach((item) => {
+// const divi = document.createElement('div')
+// divi.innerHTML = `
 
-`
-a.appendChild(divi)
-})
+// `
+// a.appendChild(divi)
+// })
