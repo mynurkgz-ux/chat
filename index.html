@@ -20,16 +20,21 @@
     --danger: #a8412e;
   }
   * { box-sizing: border-box; }
+  html {
+    height: 100%;
+  }
   body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background: var(--paper);
     color: var(--ink);
     height: 100vh;
+    height: var(--app-height, 100vh);
     overflow: hidden;
   }
   #auth-screen {
     height: 100vh;
+    height: var(--app-height, 100vh);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -100,6 +105,7 @@
   #app {
     display: none;
     height: 100vh;
+    height: var(--app-height, 100vh);
     grid-template-columns: 320px 1fr;
   }
   #app.active { display: grid; }
@@ -189,6 +195,7 @@
     display: flex;
     flex-direction: column;
     height: 100vh;
+    height: var(--app-height, 100vh);
   }
   #chat-header {
     padding: 16px 24px;
@@ -362,6 +369,21 @@
 </style>
 </head>
 <body>
+
+<script>
+  // Мобильные браузеры считают 100vh с учётом скрытой адресной строки,
+  // из-за чего реальный видимый экран меньше, и нижние элементы (поле ввода)
+  // уезжают за край. Держим точную высоту окна в CSS-переменной.
+  function setAppHeight() {
+    document.documentElement.style.setProperty("--app-height", window.innerHeight + "px");
+  }
+  setAppHeight();
+  window.addEventListener("resize", setAppHeight);
+  window.addEventListener("orientationchange", setAppHeight);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", setAppHeight);
+  }
+</script>
 
 <div id="auth-screen">
   <div class="auth-card">
