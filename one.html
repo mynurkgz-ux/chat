@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Чат</title>
+<style>
+  :root {
+    --ink: #1c2430;
+    --ink-soft: #4a5568;
+    --paper: #f6f4ef;
+    --panel: #ffffff;
+    --line: #e4e0d6;
+    --accent: #2d4159;
+    --accent-soft: #dfe6ee;
+    --bubble-mine: #2d4159;
+    --bubble-mine-text: #f6f4ef;
+    --bubble-other: #eeece4;
+    --bubble-other-text: #1c2430;
+    --danger: #a8412e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    height: 100vh;
+    overflow: hidden;
+  }
+  #auth-screen {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .auth-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 36px;
+    width: 100%;
+    max-width: 360px;
+  }
+  .auth-card h1 {
+    font-size: 22px;
+    margin: 0 0 4px;
+  }
+  .auth-card p.sub {
+    color: var(--ink-soft);
+    font-size: 14px;
+    margin: 0 0 24px;
+  }
+  .field {
+    margin-bottom: 14px;
+  }
+  .field label {
+    display: block;
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+  input[type="text"], input[type="email"], input[type="password"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font-size: 14px;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  button {
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 16px;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    width: 100%;
+  }
+  .btn-primary:hover { opacity: 0.92; }
+  .link-btn {
+    background: none;
+    color: var(--accent);
+    padding: 4px 0;
+    font-weight: 500;
+  }
+  .error-text {
+    color: var(--danger);
+    font-size: 13px;
+    margin-top: 10px;
+    min-height: 16px;
+  }
+  #app {
+    display: none;
+    height: 100vh;
+    grid-template-columns: 320px 1fr;
+  }
+  #app.active { display: grid; }
+  #sidebar {
+    background: var(--panel);
+    border-right: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+  }
+  #sidebar-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  #sidebar-header .who {
+    font-weight: 600;
+    font-size: 15px;
+  }
+  #sidebar-header .who span {
+    display: block;
+    font-weight: 400;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  #sidebar-actions {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  #sidebar-actions button {
+    flex: 1;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 13px;
+    padding: 8px 6px;
+  }
+  #sidebar-actions button:hover { background: #d3dde8; }
+  #chat-list {
+    flex: 1;
+    overflow-y: auto;
+  }
+  .chat-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .chat-item:hover { background: #faf9f5; }
+  .chat-item.selected { background: var(--accent-soft); }
+  .chat-item .name { font-weight: 600; font-size: 14px; }
+  .chat-item .preview {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .chat-item .badge {
+    display: inline-block;
+    font-size: 10.5px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 3px;
+    padding: 1px 6px;
+    margin-left: 6px;
+  }
+  #empty-list {
+    padding: 24px 16px;
+    color: var(--ink-soft);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  #main-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  #chat-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--line);
+    font-weight: 600;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  #chat-header .members {
+    font-weight: 400;
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+  #no-chat-selected {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+  #messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .msg-row { display: flex; }
+  .msg-row.mine { justify-content: flex-end; }
+  .bubble {
+    max-width: 60%;
+    padding: 9px 13px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  .msg-row.mine .bubble {
+    background: var(--bubble-mine);
+    color: var(--bubble-mine-text);
+    border-bottom-right-radius: 3px;
+  }
+  .msg-row:not(.mine) .bubble {
+    background: var(--bubble-other);
+    color: var(--bubble-other-text);
+    border-bottom-left-radius: 3px;
+  }
+  .bubble .sender {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    opacity: 0.65;
+    margin-bottom: 2px;
+  }
+  #compose {
+    border-top: 1px solid var(--line);
+    padding: 14px 24px;
+    display: flex;
+    gap: 10px;
+  }
+  #compose input {
+    flex: 1;
+  }
+  #compose button {
+    background: var(--accent);
+    color: #fff;
+    padding: 10px 20px;
+  }
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(28,36,48,0.4);
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: var(--panel);
+    border-radius: 10px;
+    padding: 28px;
+    width: 100%;
+    max-width: 380px;
+  }
+  .modal h2 { margin: 0 0 16px; font-size: 17px; }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .modal-actions .cancel {
+    background: var(--accent-soft);
+    color: var(--accent);
+    flex: 1;
+  }
+  .modal-actions .confirm {
+    background: var(--accent);
+    color: #fff;
+    flex: 1;
+  }
+  .hint {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: -8px;
+    margin-bottom: 14px;
+  }
+</style>
+</head>
+<body>
+
+<div id="auth-screen">
+  <div class="auth-card">
+    <h1>Чат</h1>
+    <p class="sub" id="auth-sub">Войдите, чтобы писать друзьям и создавать группы.</p>
+    <div id="login-form">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="you@example.com" />
+      </div>
+      <div class="field">
+        <label>Пароль</label>
+        <input type="password" id="login-password" placeholder="••••••••" />
+      </div>
+      <button class="btn-primary" id="login-btn">Войти</button>
+      <p class="error-text" id="login-error"></p>
+      <button class="link-btn" id="show-register">Нет аккаунта? Зарегистрироваться</button>
+    </div>
+    <div id="register-form" style="display:none;">
+      <div class="field">
+        <label>Имя</label>
+        <input type="text" id="reg-name" placeholder="Как вас видят друзья" />
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="reg-email" placeholder="you@example.com" />
+      </div>
+      <div class="field">
+        <label>Пароль</label>
+        <input type="password" id="reg-password" placeholder="минимум 6 символов" />
+      </div>
+      <button class="btn-primary" id="register-btn">Создать аккаунт</button>
+      <p class="error-text" id="register-error"></p>
+      <button class="link-btn" id="show-login">Уже есть аккаунт? Войти</button>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+  <div id="sidebar">
+    <div id="sidebar-header">
+      <div class="who">
+        <span id="my-name">—</span>
+        <span id="my-email">—</span>
+      </div>
+      <button class="link-btn" id="logout-btn">Выйти</button>
+    </div>
+    <div id="sidebar-actions">
+      <button id="new-direct-btn">+ Другу</button>
+      <button id="new-group-btn">+ Группа</button>
+    </div>
+    <div id="chat-list"></div>
+  </div>
+  <div id="main-panel">
+    <div id="no-chat-selected">Выберите чат слева или начните новый</div>
+    <div id="chat-view" style="display:none; flex-direction:column; height:100%;">
+      <div id="chat-header">
+        <div>
+          <div id="chat-title">—</div>
+          <div class="members" id="chat-members"></div>
+        </div>
+      </div>
+      <div id="messages"></div>
+      <div id="compose">
+        <input type="text" id="message-input" placeholder="Напишите сообщение…" />
+        <button id="send-btn">Отправить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="direct-modal">
+  <div class="modal">
+    <h2>Написать другу</h2>
+    <div class="field">
+      <label>Email друга</label>
+      <input type="email" id="direct-email" placeholder="friend@example.com" />
+    </div>
+    <p class="hint">Друг должен быть зарегистрирован в этом чате под этим email.</p>
+    <p class="error-text" id="direct-error"></p>
+    <div class="modal-actions">
+      <button class="cancel" data-close="direct-modal">Отмена</button>
+      <button class="confirm" id="direct-confirm">Начать чат</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="group-modal">
+  <div class="modal">
+    <h2>Новая группа</h2>
+    <div class="field">
+      <label>Название группы</label>
+      <input type="text" id="group-name" placeholder="Например, Поход выходного дня" />
+    </div>
+    <div class="field">
+      <label>Участники (email через запятую)</label>
+      <input type="text" id="group-emails" placeholder="a@example.com, b@example.com" />
+    </div>
+    <p class="hint">Каждый участник должен быть уже зарегистрирован.</p>
+    <p class="error-text" id="group-error"></p>
+    <div class="modal-actions">
+      <button class="cancel" data-close="group-modal">Отмена</button>
+      <button class="confirm" id="group-confirm">Создать</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+  import {
+    getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+    onAuthStateChanged, signOut, updateProfile
+  } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+  import {
+    getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs,
+    onSnapshot, addDoc, updateDoc, serverTimestamp, orderBy
+  } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCx2kKN5yOMV4ElaFy0nVaUYnpff9Q6ypA",
+    authDomain: "one-click-35d9a.firebaseapp.com",
+    projectId: "one-click-35d9a",
+    storageBucket: "one-click-35d9a.firebasestorage.app",
+    messagingSenderId: "783995446906",
+    appId: "1:783995446906:web:7bf0006f7f0768c4dffdc3",
+    measurementId: "G-3YWCDM3K8P"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // ---------- DOM ----------
+  const $ = (id) => document.getElementById(id);
+  const authScreen = $("auth-screen");
+  const appEl = $("app");
+
+  $("show-register").onclick = () => { $("login-form").style.display = "none"; $("register-form").style.display = "block"; };
+  $("show-login").onclick = () => { $("register-form").style.display = "none"; $("login-form").style.display = "block"; };
+
+  $("register-btn").onclick = async () => {
+    const name = $("reg-name").value.trim();
+    const email = $("reg-email").value.trim();
+    const password = $("reg-password").value;
+    $("register-error").textContent = "";
+    if (!name || !email || !password) { $("register-error").textContent = "Заполните все поля."; return; }
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(cred.user, { displayName: name });
+      await setDoc(doc(db, "users", cred.user.uid), {
+        displayName: name,
+        email: email,
+        createdAt: serverTimestamp()
+      });
+    } catch (e) {
+      $("register-error").textContent = friendlyError(e);
+    }
+  };
+
+  $("login-btn").onclick = async () => {
+    const email = $("login-email").value.trim();
+    const password = $("login-password").value;
+    $("login-error").textContent = "";
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (e) {
+      $("login-error").textContent = friendlyError(e);
+    }
+  };
+
+  $("logout-btn").onclick = () => signOut(auth);
+
+  function friendlyError(e) {
+    const code = e.code || "";
+    if (code.includes("email-already-in-use")) return "Этот email уже зарегистрирован.";
+    if (code.includes("invalid-credential") || code.includes("wrong-password") || code.includes("user-not-found")) return "Неверный email или пароль.";
+    if (code.includes("weak-password")) return "Пароль слишком короткий (минимум 6 символов).";
+    if (code.includes("invalid-email")) return "Некорректный email.";
+    return "Что-то пошло не так: " + (e.message || code);
+  }
+
+  // ---------- State ----------
+  let currentUser = null;
+  let currentChatId = null;
+  let unsubChats = null;
+  let unsubMessages = null;
+  const userCache = new Map(); // uid -> {displayName, email}
+
+  async function getUserDoc(uid) {
+    if (userCache.has(uid)) return userCache.get(uid);
+    try {
+      const snap = await getDoc(doc(db, "users", uid));
+      const data = snap.exists() ? snap.data() : { displayName: "Неизвестный", email: "" };
+      userCache.set(uid, data);
+      return data;
+    } catch (err) {
+      console.error("[ОШИБКА: чтение профиля пользователя]", err.code, err.message, "target uid:", uid, "my uid:", currentUser?.uid);
+      return { displayName: "Неизвестный", email: "" };
+    }
+  }
+
+  async function findUserByEmail(email) {
+    try {
+      const q = query(collection(db, "users"), where("email", "==", email));
+      const snap = await getDocs(q);
+      if (snap.empty) return null;
+      const d = snap.docs[0];
+      return { uid: d.id, ...d.data() };
+    } catch (err) {
+      console.error("[ОШИБКА: поиск пользователя по email]", err.code, err.message, "uid:", currentUser?.uid);
+      throw err;
+    }
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      currentUser = user;
+      $("my-name").textContent = user.displayName || "Без имени";
+      $("my-email").textContent = user.email;
+      authScreen.style.display = "none";
+      appEl.className = "active";
+      listenToChats();
+    } else {
+      currentUser = null;
+      authScreen.style.display = "flex";
+      appEl.className = "";
+      if (unsubChats) unsubChats();
+      if (unsubMessages) unsubMessages();
+    }
+  });
+
+  // ---------- Chat list ----------
+  function listenToChats() {
+    const q = query(collection(db, "chats"), where("members", "array-contains", currentUser.uid));
+    unsubChats = onSnapshot(
+      q,
+      async (snap) => {
+        const chats = [];
+        snap.forEach((d) => chats.push({ id: d.id, ...d.data() }));
+        chats.sort((a, b) => (b.lastMessageAt?.toMillis?.() || 0) - (a.lastMessageAt?.toMillis?.() || 0));
+        await renderChatList(chats);
+      },
+      (err) => {
+        console.error("[ОШИБКА: список чатов (chats listener)]", err.code, err.message, "uid:", currentUser?.uid);
+      }
+    );
+  }
+
+  async function renderChatList(chats) {
+    const listEl = $("chat-list");
+    if (chats.length === 0) {
+      listEl.innerHTML = "";
+      const empty = document.createElement("div");
+      empty.id = "empty-list";
+      empty.textContent = "Пока нет чатов. Нажмите «+ Другу» или «+ Группа», чтобы начать.";
+      listEl.appendChild(empty);
+      return;
+    }
+    listEl.innerHTML = "";
+    for (const chat of chats) {
+      const item = document.createElement("div");
+      item.className = "chat-item" + (chat.id === currentChatId ? " selected" : "");
+      let title;
+      if (chat.type === "group") {
+        title = chat.name || "Группа";
+      } else {
+        const otherUid = chat.members.find((m) => m !== currentUser.uid);
+        const otherUser = otherUid ? await getUserDoc(otherUid) : { displayName: "Вы" };
+        title = otherUser.displayName;
+      }
+      item.innerHTML = `
+        <span class="name">${escapeHtml(title)}${chat.type === "group" ? '<span class="badge">группа</span>' : ""}</span>
+        <span class="preview">${escapeHtml(chat.lastMessage || "Нет сообщений")}</span>
+      `;
+      item.onclick = () => openChat(chat.id, title, chat);
+      listEl.appendChild(item);
+    }
+  }
+
+  // ---------- Chat view ----------
+  async function openChat(chatId, title, chatData) {
+    currentChatId = chatId;
+    $("no-chat-selected").style.display = "none";
+    $("chat-view").style.display = "flex";
+    $("chat-title").textContent = title;
+
+    document.querySelectorAll(".chat-item").forEach((el) => el.classList.remove("selected"));
+
+    if (chatData.type === "group") {
+      const names = await Promise.all(chatData.members.map(async (uid) => (await getUserDoc(uid)).displayName));
+      $("chat-members").textContent = names.join(", ");
+    } else {
+      $("chat-members").textContent = "";
+    }
+
+    if (unsubMessages) unsubMessages();
+    const q = query(collection(db, "chats", chatId, "messages"), orderBy("createdAt", "asc"));
+    unsubMessages = onSnapshot(
+      q,
+      async (snap) => {
+        const msgsEl = $("messages");
+        msgsEl.innerHTML = "";
+        for (const d of snap.docs) {
+          const msg = d.data();
+          const isMine = msg.senderId === currentUser.uid;
+          const row = document.createElement("div");
+          row.className = "msg-row" + (isMine ? " mine" : "");
+          let senderLabel = "";
+          if (!isMine && chatData.type === "group") {
+            const senderData = await getUserDoc(msg.senderId);
+            senderLabel = `<span class="sender">${escapeHtml(senderData.displayName)}</span>`;
+          }
+          const bubble = document.createElement("div");
+          bubble.className = "bubble";
+          bubble.innerHTML = senderLabel + escapeHtml(msg.text || "");
+          row.appendChild(bubble);
+          msgsEl.appendChild(row);
+        }
+        msgsEl.scrollTop = msgsEl.scrollHeight;
+      },
+      (err) => {
+        console.error("[ОШИБКА: сообщения (messages listener)]", err.code, err.message, "chatId:", chatId, "uid:", currentUser?.uid);
+      }
+    );
+  }
+
+  $("send-btn").onclick = sendMessage;
+  $("message-input").addEventListener("keydown", (e) => { if (e.key === "Enter") sendMessage(); });
+
+  async function sendMessage() {
+    const input = $("message-input");
+    const text = input.value.trim();
+    if (!text || !currentChatId) return;
+    input.value = "";
+    try {
+      await addDoc(collection(db, "chats", currentChatId, "messages"), {
+        senderId: currentUser.uid,
+        text,
+        createdAt: serverTimestamp()
+      });
+      await updateDoc(doc(db, "chats", currentChatId), {
+        lastMessage: text,
+        lastMessageAt: serverTimestamp()
+      });
+    } catch (err) {
+      console.error("[ОШИБКА: отправка сообщения]", err.code, err.message, "chatId:", currentChatId, "uid:", currentUser?.uid);
+      input.value = text; // вернуть текст, чтобы не потерялся
+    }
+  }
+
+  // ---------- New direct chat ----------
+  function openModal(id) { $(id).classList.add("active"); }
+  function closeModal(id) { $(id).classList.remove("active"); }
+  document.querySelectorAll("[data-close]").forEach((btn) => {
+    btn.onclick = () => closeModal(btn.dataset.close);
+  });
+
+  $("new-direct-btn").onclick = () => { $("direct-email").value = ""; $("direct-error").textContent = ""; openModal("direct-modal"); };
+
+  $("direct-confirm").onclick = async () => {
+    const email = $("direct-email").value.trim();
+    $("direct-error").textContent = "";
+    if (!email) { $("direct-error").textContent = "Введите email."; return; }
+    if (email === currentUser.email) { $("direct-error").textContent = "Это ваш собственный email."; return; }
+    try {
+      const friend = await findUserByEmail(email);
+      if (!friend) { $("direct-error").textContent = "Пользователь с таким email не найден."; return; }
+
+      const chatId = [currentUser.uid, friend.uid].sort().join("_");
+      const chatRef = doc(db, "chats", chatId);
+      // Создаём документ чата сразу (merge: true не перезапишет существующие сообщения/поля,
+      // а если чат уже есть — просто подтвердит те же members и не создаст дубликат).
+      await setDoc(chatRef, {
+        type: "direct",
+        members: [currentUser.uid, friend.uid],
+        createdAt: serverTimestamp(),
+        lastMessage: "",
+        lastMessageAt: serverTimestamp()
+      }, { merge: true });
+
+      closeModal("direct-modal");
+      openChat(chatId, friend.displayName, { type: "direct", members: [currentUser.uid, friend.uid] });
+    } catch (err) {
+      console.error("[ОШИБКА: создание личного чата]", err.code, err.message, "uid:", currentUser?.uid);
+      $("direct-error").textContent = "Не удалось создать чат: " + (err.code || err.message);
+    }
+  };
+
+  // ---------- New group chat ----------
+  $("new-group-btn").onclick = () => {
+    $("group-name").value = "";
+    $("group-emails").value = "";
+    $("group-error").textContent = "";
+    openModal("group-modal");
+  };
+
+  $("group-confirm").onclick = async () => {
+    const name = $("group-name").value.trim();
+    const emailsRaw = $("group-emails").value.trim();
+    $("group-error").textContent = "";
+    if (!name) { $("group-error").textContent = "Введите название группы."; return; }
+    const emails = emailsRaw.split(",").map((e) => e.trim()).filter(Boolean);
+    if (emails.length === 0) { $("group-error").textContent = "Добавьте хотя бы одного участника."; return; }
+
+    const members = new Set([currentUser.uid]);
+    for (const email of emails) {
+      const user = await findUserByEmail(email);
+      if (!user) { $("group-error").textContent = `Пользователь ${email} не найден.`; return; }
+      members.add(user.uid);
+    }
+
+    const chatRef = await addDoc(collection(db, "chats"), {
+      type: "group",
+      name,
+      members: Array.from(members),
+      createdAt: serverTimestamp(),
+      lastMessage: "",
+      lastMessageAt: serverTimestamp()
+    });
+    closeModal("group-modal");
+    openChat(chatRef.id, name, { type: "group", members: Array.from(members), name });
+  };
+
+  function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+</script>
+</body>
+</html>
