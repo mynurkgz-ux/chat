@@ -103,6 +103,14 @@
     grid-template-columns: 320px 1fr;
   }
   #app.active { display: grid; }
+  #back-btn {
+    display: none;
+    background: none;
+    color: var(--accent);
+    font-size: 20px;
+    line-height: 1;
+    padding: 4px 10px 4px 0;
+  }
   #sidebar {
     background: var(--panel);
     border-right: 1px solid var(--line);
@@ -292,6 +300,65 @@
     margin-top: -8px;
     margin-bottom: 14px;
   }
+
+  /* ---------- Мобильная адаптация ---------- */
+  @media (max-width: 768px) {
+    input[type="text"], input[type="email"], input[type="password"] {
+      font-size: 16px; /* чтобы iOS Safari не увеличивал масштаб при фокусе */
+    }
+    .auth-card {
+      padding: 24px;
+    }
+    #app {
+      grid-template-columns: 1fr;
+    }
+    #sidebar {
+      display: none;
+    }
+    #app.active #sidebar {
+      display: flex;
+    }
+    #app.chat-open #sidebar {
+      display: none;
+    }
+    #main-panel {
+      display: none;
+    }
+    #app.chat-open #main-panel {
+      display: flex;
+    }
+    #back-btn {
+      display: inline-block;
+    }
+    #sidebar-header .who {
+      font-size: 14px;
+    }
+    #chat-header {
+      padding: 14px 16px;
+    }
+    #messages {
+      padding: 16px;
+    }
+    .bubble {
+      max-width: 78%;
+    }
+    #compose {
+      padding: 10px 12px;
+      /* оставляет отступ снизу под системную навигацию/клавиатуру на телефонах */
+      padding-bottom: max(10px, env(safe-area-inset-bottom));
+    }
+    .modal {
+      max-width: 92vw;
+      padding: 22px;
+    }
+    #sidebar-actions button {
+      padding: 10px 6px;
+      font-size: 13px;
+    }
+    .chat-item {
+      padding: 14px 16px;
+    }
+  }
 </style>
 </head>
 <body>
@@ -352,7 +419,8 @@
     <div id="no-chat-selected">Выберите чат слева или начните новый</div>
     <div id="chat-view" style="display:none; flex-direction:column; height:100%;">
       <div id="chat-header">
-        <div>
+        <button id="back-btn" aria-label="Назад к списку чатов">←</button>
+        <div style="flex:1;">
           <div id="chat-title">—</div>
           <div class="members" id="chat-members"></div>
         </div>
