@@ -499,6 +499,30 @@
   const $ = (id) => document.getElementById(id);
   const authScreen = $("auth-screen");
   const appEl = $("app");
+  const sidebarEl = $("sidebar");
+  const mainPanelEl = $("main-panel");
+
+  function isMobileLayout() {
+    return window.matchMedia("(max-width: 768px)").matches;
+  }
+  function showChatOnMobile() {
+    if (!isMobileLayout()) return;
+    sidebarEl.style.display = "none";
+    mainPanelEl.style.display = "flex";
+  }
+  function showListOnMobile() {
+    if (!isMobileLayout()) return;
+    sidebarEl.style.display = "flex";
+    mainPanelEl.style.display = "none";
+  }
+  // Если экран стал широким (повернули телефон, развернули окно), убираем
+  // любые инлайн-стили, чтобы снова работала обычная десктопная раскладка.
+  window.addEventListener("resize", () => {
+    if (!isMobileLayout()) {
+      sidebarEl.style.display = "";
+      mainPanelEl.style.display = "";
+    }
+  });
 
   $("show-register").onclick = () => { $("login-form").style.display = "none"; $("register-form").style.display = "block"; };
   $("show-login").onclick = () => { $("register-form").style.display = "none"; $("login-form").style.display = "block"; };
@@ -584,15 +608,25 @@
       $("my-email").textContent = user.email;
       authScreen.style.display = "none";
       appEl.className = "active";
+      showListOnMobile();
       listenToChats();
     } else {
       currentUser = null;
       authScreen.style.display = "flex";
       appEl.className = "";
+      currentChatId = null;
       if (unsubChats) unsubChats();
       if (unsubMessages) unsubMessages();
     }
   });
+
+  $("back-btn").onclick = () => {
+    appEl.classList.remove("chat-open");
+    showListOnMobile();
+    currentChatId = null;
+    if (unsubMessages) unsubMessages();
+    document.querySelectorAll(".chat-item").forEach((el) => el.classList.remove("selected"));
+  };
 
   // ---------- Chat list ----------
   function listenToChats() {
@@ -648,6 +682,8 @@
     $("no-chat-selected").style.display = "none";
     $("chat-view").style.display = "flex";
     $("chat-title").textContent = title;
+    appEl.classList.add("chat-open"); // на мобильном переключает список чатов на сам чат
+    showChatOnMobile();
 
     document.querySelectorAll(".chat-item").forEach((el) => el.classList.remove("selected"));
 
