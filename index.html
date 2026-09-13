@@ -3,21 +3,21 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Чат</title>
+<title>ONE</title>
 <style>
   :root {
-    --ink: #1c2430;
-    --ink-soft: #4a5568;
-    --paper: #f6f4ef;
+    --ink: #14151a;
+    --ink-soft: #75767c;
+    --paper: #fafafa;
     --panel: #ffffff;
-    --line: #e4e0d6;
-    --accent: #2d4159;
-    --accent-soft: #dfe6ee;
-    --bubble-mine: #2d4159;
-    --bubble-mine-text: #f6f4ef;
-    --bubble-other: #eeece4;
-    --bubble-other-text: #1c2430;
-    --danger: #a8412e;
+    --line: #e9e9eb;
+    --accent: #1f4bd8;
+    --accent-soft: #eaeeff;
+    --bubble-mine: #14151a;
+    --bubble-mine-text: #fafafa;
+    --bubble-other: #f1f1f2;
+    --bubble-other-text: #14151a;
+    --danger: #c53030;
   }
   * { box-sizing: border-box; }
   html {
@@ -48,9 +48,22 @@
     width: 100%;
     max-width: 360px;
   }
-  .auth-card h1 {
-    font-size: 22px;
-    margin: 0 0 4px;
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    margin: 0 0 6px;
+  }
+  .logo-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
   }
   .auth-card p.sub {
     color: var(--ink-soft);
@@ -123,6 +136,16 @@
     display: flex;
     flex-direction: column;
   }
+  #brand-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 16px 0;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+  }
   #sidebar-header {
     padding: 16px;
     border-bottom: 1px solid var(--line);
@@ -153,7 +176,7 @@
     font-size: 13px;
     padding: 8px 6px;
   }
-  #sidebar-actions button:hover { background: #d3dde8; }
+  #sidebar-actions button:hover { background: #dde4fb; }
   #chat-list {
     flex: 1;
     overflow-y: auto;
@@ -166,7 +189,7 @@
     flex-direction: column;
     gap: 2px;
   }
-  .chat-item:hover { background: #faf9f5; }
+  .chat-item:hover { background: #f5f5f6; }
   .chat-item.selected { background: var(--accent-soft); }
   .chat-item .name { font-weight: 600; font-size: 14px; }
   .chat-item .preview {
@@ -272,7 +295,7 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(28,36,48,0.4);
+    background: rgba(20,21,26,0.45);
     align-items: center;
     justify-content: center;
     z-index: 10;
@@ -387,12 +410,12 @@
 
 <div id="auth-screen">
   <div class="auth-card">
-    <h1>Чат</h1>
+    <div class="logo"><span class="logo-dot"></span>ONE</div>
     <p class="sub" id="auth-sub">Войдите, чтобы писать друзьям и создавать группы.</p>
     <div id="login-form">
       <div class="field">
-        <label>Email</label>
-        <input type="email" id="login-email" placeholder="you@example.com" />
+        <label>Имя пользователя</label>
+        <input type="text" id="login-username" placeholder="username" autocapitalize="none" />
       </div>
       <div class="field">
         <label>Пароль</label>
@@ -408,9 +431,10 @@
         <input type="text" id="reg-name" placeholder="Как вас видят друзья" />
       </div>
       <div class="field">
-        <label>Email</label>
-        <input type="email" id="reg-email" placeholder="you@example.com" />
+        <label>Имя пользователя</label>
+        <input type="text" id="reg-username" placeholder="username" autocapitalize="none" />
       </div>
+      <p class="hint">Латинские буквы, цифры, "_", от 3 до 20 символов. Другие люди будут находить вас по нему.</p>
       <div class="field">
         <label>Пароль</label>
         <input type="password" id="reg-password" placeholder="минимум 6 символов" />
@@ -424,10 +448,11 @@
 
 <div id="app">
   <div id="sidebar">
+    <div id="brand-bar"><span class="logo-dot"></span>ONE</div>
     <div id="sidebar-header">
       <div class="who">
         <span id="my-name">—</span>
-        <span id="my-email">—</span>
+        <span id="my-username">—</span>
       </div>
       <button class="link-btn" id="logout-btn">Выйти</button>
     </div>
@@ -460,10 +485,10 @@
   <div class="modal">
     <h2>Написать другу</h2>
     <div class="field">
-      <label>Email друга</label>
-      <input type="email" id="direct-email" placeholder="friend@example.com" />
+      <label>Имя пользователя друга</label>
+      <input type="text" id="direct-username" placeholder="username" autocapitalize="none" />
     </div>
-    <p class="hint">Друг должен быть зарегистрирован в этом чате под этим email.</p>
+    <p class="hint">Друг должен быть зарегистрирован в этом чате под этим именем пользователя.</p>
     <p class="error-text" id="direct-error"></p>
     <div class="modal-actions">
       <button class="cancel" data-close="direct-modal">Отмена</button>
@@ -480,8 +505,8 @@
       <input type="text" id="group-name" placeholder="Например, Поход выходного дня" />
     </div>
     <div class="field">
-      <label>Участники (email через запятую)</label>
-      <input type="text" id="group-emails" placeholder="a@example.com, b@example.com" />
+      <label>Участники (имена пользователей через запятую)</label>
+      <input type="text" id="group-usernames" placeholder="bakyt, mynurkgz" autocapitalize="none" />
     </div>
     <p class="hint">Каждый участник должен быть уже зарегистрирован.</p>
     <p class="error-text" id="group-error"></p>
@@ -549,18 +574,31 @@
   $("show-register").onclick = () => { $("login-form").style.display = "none"; $("register-form").style.display = "block"; };
   $("show-login").onclick = () => { $("register-form").style.display = "none"; $("login-form").style.display = "block"; };
 
+  // Firebase Auth умеет работать только через email/телефон, поэтому из
+  // юзернейма мы прозрачно делаем служебный email — пользователь его никогда
+  // не видит и не вводит.
+  const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
+  function usernameToEmail(username) {
+    return username.trim().toLowerCase() + "@chat.local";
+  }
+
   $("register-btn").onclick = async () => {
     const name = $("reg-name").value.trim();
-    const email = $("reg-email").value.trim();
+    const usernameRaw = $("reg-username").value.trim();
+    const username = usernameRaw.toLowerCase();
     const password = $("reg-password").value;
     $("register-error").textContent = "";
-    if (!name || !email || !password) { $("register-error").textContent = "Заполните все поля."; return; }
+    if (!name || !usernameRaw || !password) { $("register-error").textContent = "Заполните все поля."; return; }
+    if (!USERNAME_RE.test(username)) {
+      $("register-error").textContent = "Имя пользователя: только латинские буквы, цифры и \"_\", от 3 до 20 символов.";
+      return;
+    }
     try {
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      const cred = await createUserWithEmailAndPassword(auth, usernameToEmail(username), password);
       await updateProfile(cred.user, { displayName: name });
       await setDoc(doc(db, "users", cred.user.uid), {
         displayName: name,
-        email: email,
+        username: username,
         createdAt: serverTimestamp()
       });
     } catch (e) {
@@ -569,11 +607,12 @@
   };
 
   $("login-btn").onclick = async () => {
-    const email = $("login-email").value.trim();
+    const usernameRaw = $("login-username").value.trim();
     const password = $("login-password").value;
     $("login-error").textContent = "";
+    if (!usernameRaw || !password) { $("login-error").textContent = "Заполните все поля."; return; }
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth, usernameToEmail(usernameRaw), password);
     } catch (e) {
       $("login-error").textContent = friendlyError(e);
     }
@@ -583,42 +622,42 @@
 
   function friendlyError(e) {
     const code = e.code || "";
-    if (code.includes("email-already-in-use")) return "Этот email уже зарегистрирован.";
-    if (code.includes("invalid-credential") || code.includes("wrong-password") || code.includes("user-not-found")) return "Неверный email или пароль.";
+    if (code.includes("email-already-in-use")) return "Это имя пользователя уже занято.";
+    if (code.includes("invalid-credential") || code.includes("wrong-password") || code.includes("user-not-found")) return "Неверное имя пользователя или пароль.";
     if (code.includes("weak-password")) return "Пароль слишком короткий (минимум 6 символов).";
-    if (code.includes("invalid-email")) return "Некорректный email.";
     return "Что-то пошло не так: " + (e.message || code);
   }
 
   // ---------- State ----------
   let currentUser = null;
+  let currentUsername = "";
   let currentChatId = null;
   let unsubChats = null;
   let unsubMessages = null;
-  const userCache = new Map(); // uid -> {displayName, email}
+  const userCache = new Map(); // uid -> {displayName, username}
 
   async function getUserDoc(uid) {
     if (userCache.has(uid)) return userCache.get(uid);
     try {
       const snap = await getDoc(doc(db, "users", uid));
-      const data = snap.exists() ? snap.data() : { displayName: "Неизвестный", email: "" };
+      const data = snap.exists() ? snap.data() : { displayName: "Неизвестный", username: "" };
       userCache.set(uid, data);
       return data;
     } catch (err) {
       console.error("[ОШИБКА: чтение профиля пользователя]", err.code, err.message, "target uid:", uid, "my uid:", currentUser?.uid);
-      return { displayName: "Неизвестный", email: "" };
+      return { displayName: "Неизвестный", username: "" };
     }
   }
 
-  async function findUserByEmail(email) {
+  async function findUserByUsername(username) {
     try {
-      const q = query(collection(db, "users"), where("email", "==", email));
+      const q = query(collection(db, "users"), where("username", "==", username.trim().toLowerCase()));
       const snap = await getDocs(q);
       if (snap.empty) return null;
       const d = snap.docs[0];
       return { uid: d.id, ...d.data() };
     } catch (err) {
-      console.error("[ОШИБКА: поиск пользователя по email]", err.code, err.message, "uid:", currentUser?.uid);
+      console.error("[ОШИБКА: поиск пользователя по username]", err.code, err.message, "uid:", currentUser?.uid);
       throw err;
     }
   }
@@ -627,13 +666,17 @@
     if (user) {
       currentUser = user;
       $("my-name").textContent = user.displayName || "Без имени";
-      $("my-email").textContent = user.email;
       authScreen.style.display = "none";
       appEl.className = "active";
       showListOnMobile();
       listenToChats();
+      // Подгружаем свой профиль, чтобы показать @username и знать его для сравнений
+      const myProfile = await getUserDoc(user.uid);
+      currentUsername = myProfile.username || "";
+      $("my-username").textContent = currentUsername ? "@" + currentUsername : "";
     } else {
       currentUser = null;
+      currentUsername = "";
       authScreen.style.display = "flex";
       appEl.className = "";
       currentChatId = null;
@@ -778,16 +821,16 @@
     btn.onclick = () => closeModal(btn.dataset.close);
   });
 
-  $("new-direct-btn").onclick = () => { $("direct-email").value = ""; $("direct-error").textContent = ""; openModal("direct-modal"); };
+  $("new-direct-btn").onclick = () => { $("direct-username").value = ""; $("direct-error").textContent = ""; openModal("direct-modal"); };
 
   $("direct-confirm").onclick = async () => {
-    const email = $("direct-email").value.trim();
+    const username = $("direct-username").value.trim();
     $("direct-error").textContent = "";
-    if (!email) { $("direct-error").textContent = "Введите email."; return; }
-    if (email === currentUser.email) { $("direct-error").textContent = "Это ваш собственный email."; return; }
+    if (!username) { $("direct-error").textContent = "Введите имя пользователя."; return; }
+    if (username.toLowerCase() === currentUsername.toLowerCase()) { $("direct-error").textContent = "Это ваше собственное имя пользователя."; return; }
     try {
-      const friend = await findUserByEmail(email);
-      if (!friend) { $("direct-error").textContent = "Пользователь с таким email не найден."; return; }
+      const friend = await findUserByUsername(username);
+      if (!friend) { $("direct-error").textContent = "Пользователь с таким именем не найден."; return; }
 
       const chatId = [currentUser.uid, friend.uid].sort().join("_");
       const chatRef = doc(db, "chats", chatId);
@@ -812,23 +855,23 @@
   // ---------- New group chat ----------
   $("new-group-btn").onclick = () => {
     $("group-name").value = "";
-    $("group-emails").value = "";
+    $("group-usernames").value = "";
     $("group-error").textContent = "";
     openModal("group-modal");
   };
 
   $("group-confirm").onclick = async () => {
     const name = $("group-name").value.trim();
-    const emailsRaw = $("group-emails").value.trim();
+    const usernamesRaw = $("group-usernames").value.trim();
     $("group-error").textContent = "";
     if (!name) { $("group-error").textContent = "Введите название группы."; return; }
-    const emails = emailsRaw.split(",").map((e) => e.trim()).filter(Boolean);
-    if (emails.length === 0) { $("group-error").textContent = "Добавьте хотя бы одного участника."; return; }
+    const usernames = usernamesRaw.split(",").map((u) => u.trim()).filter(Boolean);
+    if (usernames.length === 0) { $("group-error").textContent = "Добавьте хотя бы одного участника."; return; }
 
     const members = new Set([currentUser.uid]);
-    for (const email of emails) {
-      const user = await findUserByEmail(email);
-      if (!user) { $("group-error").textContent = `Пользователь ${email} не найден.`; return; }
+    for (const uname of usernames) {
+      const user = await findUserByUsername(uname);
+      if (!user) { $("group-error").textContent = `Пользователь ${uname} не найден.`; return; }
       members.add(user.uid);
     }
 
